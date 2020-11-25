@@ -1,5 +1,6 @@
 package silva.lucas.cursomc.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.hibernate.ObjectNotFoundException;
@@ -42,6 +43,9 @@ public class CategoriaService {
 			
 		}
 		repo.deleteById(id);
+	}
+	public List<Categoria> findAll(){
+		return repo.findAll();
 	}
 	
 }
