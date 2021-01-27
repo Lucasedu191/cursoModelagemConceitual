@@ -3,7 +3,6 @@ package silva.lucas.cursomc.services;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -16,12 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import silva.lucas.cursomc.domain.Cidade;
 import silva.lucas.cursomc.domain.Cliente;
 import silva.lucas.cursomc.domain.Endereco;
+import silva.lucas.cursomc.domain.enums.Perfil;
 import silva.lucas.cursomc.domain.enums.TipoCliente;
 import silva.lucas.cursomc.dto.ClienteDTO;
 import silva.lucas.cursomc.dto.ClienteNewDTO;
 import silva.lucas.cursomc.repositories.ClienteRepository;
 import silva.lucas.cursomc.repositories.EnderecoRepository;
+import silva.lucas.cursomc.security.UserSS;
+import silva.lucas.cursomc.services.exceptions.AuthorizationException;
 import silva.lucas.cursomc.services.exceptions.DataIntegrityException;
+import silva.lucas.cursomc.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class ClienteService {
@@ -39,6 +42,12 @@ public class ClienteService {
 	private EnderecoRepository enderecoRepository;
 	
 	public Cliente find(Integer id) {
+		
+		UserSS user = UserService.authenticated();
+		if(user==null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 		"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName(), null));
